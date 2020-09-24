@@ -56,7 +56,12 @@ CPanelWidget::CPanelWidget(QWidget *parent) :
 	ui->_pathNavigator->setCompleter(new CDirectoryCompleter(ui->_pathNavigator));
 	ui->_pathNavigator->setHistoryMode(true);
 	ui->_pathNavigator->installEventFilter(this);
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
 	assert_r(connect(ui->_pathNavigator, &CHistoryComboBox::textActivated, this, &CPanelWidget::pathFromHistoryActivated));
+#else
+	assert_r(connect(ui->_pathNavigator, QOverload<const QString&>::of(&CHistoryComboBox::activated), this, &CPanelWidget::pathFromHistoryActivated));
+#endif
+
 	assert_r(connect(ui->_pathNavigator, &CHistoryComboBox::itemActivated, this, &CPanelWidget::pathFromHistoryActivated));
 
 	assert_r(connect(ui->_list, &CFileListView::contextMenuRequested, this, &CPanelWidget::showContextMenuForItems));
@@ -959,7 +964,7 @@ void CPanelWidget::updateCurrentDiskButtonAndInfoLabel()
 		ui->_driveInfoLabel->clear();
 		return;
 	}
-	
+
 	const auto diskInfo = _controller->volumeEnumerator().drives()[*currentDriveId];
 	_currentDisk = diskInfo.rootObjectInfo.fullAbsolutePath();
 	ui->_driveInfoLabel->setText(tr("%1 (%2): <b>%4 free</b> of %5 total").

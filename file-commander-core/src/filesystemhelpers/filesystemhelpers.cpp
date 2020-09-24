@@ -15,6 +15,7 @@ RESTORE_COMPILER_WARNINGS
 #else
 #include <stdlib.h>
 #include <unistd.h> // access()
+#include <dirent.h>
 #endif
 
 // If the command exists, returns its path: either the argument as is if exists (absolute, or in the working dir),
@@ -39,8 +40,10 @@ QString FileSystemHelpers::resolvePath(const QString &command)
 	assert_and_return_r(getEnvironmentVariableW_num_characters_returned > 0, {});
 
 	const QStringList pathDirectories = QString::fromWCharArray(paths, getEnvironmentVariableW_num_characters_returned).split(';', Qt::SkipEmptyParts);
-#else
+#elseif QT_VERSION >= QT_VERSION_CHECK(5,14,0)
 	const QStringList pathDirectories = QString(::getenv("PATH")).split(':', Qt::SkipEmptyParts);
+#else
+    const QStringList pathDirectories = QString(::getenv("PATH")).split(':', QString::SkipEmptyParts);
 #endif
 
 	for (const auto& directory: pathDirectories)

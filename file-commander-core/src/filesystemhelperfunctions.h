@@ -122,7 +122,11 @@ inline std::vector<QString> pathComponents(const QString& path)
 	// This could be a network path
 	assert_debug_only(!path.contains('\\') && path.lastIndexOf("//") <= 0);
 #endif // !_WIN32
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
 	auto components = path.split('/', Qt::KeepEmptyParts);
+#else
+	auto components = path.split('/', QString::KeepEmptyParts);
+#endif
 	if (components.empty())
 		return { path };
 
